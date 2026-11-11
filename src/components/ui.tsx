@@ -29,16 +29,16 @@ export function Empty({ children }: { children: React.ReactNode }) {
 }
 
 const STATUS_PILL: Record<string, string> = {
-  ACTIVE: "bg-emerald-50 text-emerald-700",
+  ACTIVE: "bg-brand-50 text-brand-700",
   PAUSED: "bg-amber-50 text-amber-700",
   FORMER: "bg-stone-100 text-stone-600",
-  SCHEDULED: "bg-sky-50 text-sky-700",
-  COMPLETED: "bg-emerald-50 text-emerald-700",
+  SCHEDULED: "bg-violet-50 text-violet-700",
+  COMPLETED: "bg-brand-50 text-brand-700",
   NO_SHOW: "bg-red-50 text-red-700",
   CANCELLED: "bg-stone-100 text-stone-600",
   EXHAUSTED: "bg-stone-100 text-stone-600",
   EXPIRED: "bg-amber-50 text-amber-700",
-  ACHIEVED: "bg-emerald-50 text-emerald-700",
+  ACHIEVED: "bg-brand-50 text-brand-700",
   DROPPED: "bg-stone-100 text-stone-600",
 };
 

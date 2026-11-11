@@ -39,7 +39,7 @@ export function SessionList({ sessions, showWho = false }: { sessions: SessionRo
             <p className="mt-1 line-clamp-3 whitespace-pre-line text-sm text-stone-600">{s.notes}</p>
           )}
           {s.status === "COMPLETED" && s.nextFocus && (
-            <p className="mt-1 text-xs text-emerald-800"><span className="font-medium">Next:</span> {s.nextFocus}</p>
+            <p className="mt-1 text-xs text-brand-800"><span className="font-medium">Next:</span> {s.nextFocus}</p>
           )}
           {s.status === "SCHEDULED" && s.prepNotes && (
             <p className="mt-1 line-clamp-2 text-sm text-stone-500"><span className="font-medium">Plan:</span> {s.prepNotes}</p>

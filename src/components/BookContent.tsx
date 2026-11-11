@@ -18,7 +18,7 @@ export function BookContent({ content, highlight }: { content: string; highlight
           case "h":
             return <h3 key={k} className="mt-7 mb-2 text-lg font-semibold text-stone-900">{runs}</h3>;
           case "quote":
-            return <blockquote key={k} className="mb-1 border-l-2 border-emerald-300 pl-4 leading-7 text-stone-700 italic">{runs}</blockquote>;
+            return <blockquote key={k} className="mb-1 border-l-2 border-brand-300 pl-4 leading-7 text-stone-700 italic">{runs}</blockquote>;
           case "attr":
             return <p key={k} className="mb-5 pl-4 text-sm text-stone-500">{runs}</p>;
           case "li":

@@ -32,7 +32,7 @@ export function GuardianSection({ clientId, guardians }: { clientId: string; gua
                 <div className="font-medium text-stone-900">
                   {g.name}
                   {g.relationship && <span className="font-normal text-stone-500"> · {g.relationship}</span>}
-                  {g.isPrimary && <span className="ml-1 pill bg-emerald-50 text-emerald-700">primary</span>}
+                  {g.isPrimary && <span className="ml-1 pill bg-brand-50 text-brand-700">primary</span>}
                 </div>
                 {g.phone && <div><a href={`tel:${g.phone}`} className="hover:underline">{g.phone}</a></div>}
                 {g.email && <div><a href={`mailto:${g.email}`} className="hover:underline">{g.email}</a></div>}
@@ -47,7 +47,7 @@ export function GuardianSection({ clientId, guardians }: { clientId: string; gua
         ))}
       </ul>
       <details className="mt-3">
-        <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Add parent</summary>
+        <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Add parent</summary>
         <div className="mt-3"><GuardianForm clientId={clientId} /></div>
       </details>
     </section>

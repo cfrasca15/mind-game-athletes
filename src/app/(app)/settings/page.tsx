@@ -35,7 +35,7 @@ export default async function SettingsPage() {
                       <span className={`font-medium ${p.active ? "text-stone-900" : "text-stone-400 line-through"}`}>{p.name}</span>
                       <span className="text-stone-500"> · {p.sessionCount} session{p.sessionCount === 1 ? "" : "s"} · {money(p.priceCents)}</span>
                       {p.expiresDays && <span className="text-stone-500"> · expires after {p.expiresDays} days</span>}
-                      {p.forTeams && <span className="pill ml-2 bg-sky-50 text-sky-700">team</span>}
+                      {p.forTeams && <span className="pill ml-2 bg-violet-50 text-violet-700">team</span>}
                       <span className="ml-2 text-xs text-stone-400">sold {p._count.clientPackages}×</span>
                     </div>
                     <div className="flex gap-3 text-xs">
@@ -51,7 +51,7 @@ export default async function SettingsPage() {
               ))}
             </ul>
             <details className="mt-4" open={packages.length === 0}>
-              <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Add package</summary>
+              <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Add package</summary>
               <div className="mt-3"><PackageForm /></div>
             </details>
           </section>

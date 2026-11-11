@@ -26,7 +26,7 @@ export function GoogleCalendarCard({ status }: { status: GoogleStatus }) {
     <section className="card">
       <div className="mb-1 flex items-center gap-2">
         <h2 className="font-semibold text-stone-900">Google Calendar</h2>
-        {status && <span className="pill bg-emerald-50 text-emerald-700">Connected</span>}
+        {status && <span className="pill bg-brand-50 text-brand-700">Connected</span>}
       </div>
       <p className="mb-4 text-sm text-stone-500">
         Sessions you book here show up on your Google Calendar. Change or cancel a session here and the calendar follows. Edits made in Google Calendar do not come back here.
@@ -44,7 +44,7 @@ function Connect() {
   return (
     <>
       <details className="mb-4 rounded-lg border border-stone-200 p-3 text-sm text-stone-700">
-        <summary className="cursor-pointer font-medium text-emerald-800">How to set this up (about 10 minutes, once)</summary>
+        <summary className="cursor-pointer font-medium text-brand-800">How to set this up (about 10 minutes, once)</summary>
         <ol className="mt-3 list-decimal space-y-2 pl-5">
           <li>In Google Calendar on a computer, create a new calendar called <b>Mind Game Athletes</b>: next to &ldquo;Other calendars&rdquo; click <b>+</b>, then <b>Create new calendar</b>.</li>
           <li>Go to <b>console.cloud.google.com</b>, sign in with a personal Gmail account, and create a project (any name).</li>

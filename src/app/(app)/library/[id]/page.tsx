@@ -38,9 +38,9 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
                 <li key={c.id} className="mt-5 mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase first:mt-0">{c.title}</li>
               ) : (
                 <li key={c.id} className="border-t border-stone-100 first:border-t-0">
-                  <Link href={`/library/${book.id}/${c.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:text-emerald-800">
+                  <Link href={`/library/${book.id}/${c.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:text-brand-800">
                     <span>{c.title}</span>
-                    {c.notes && <span className="pill bg-emerald-50 text-emerald-700">your notes</span>}
+                    {c.notes && <span className="pill bg-brand-50 text-brand-700">your notes</span>}
                   </Link>
                 </li>
               ),

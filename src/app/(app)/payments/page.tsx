@@ -44,8 +44,8 @@ export default async function PaymentsPage({
       </div>
 
       <div className="mb-4 flex gap-1">
-        <Link href="/payments?view=balances" className={`rounded-lg px-3 py-1.5 text-sm font-medium ${view === "balances" ? "bg-emerald-50 text-emerald-800" : "text-stone-600 hover:bg-stone-100"}`}>Balances</Link>
-        <Link href="/payments?view=ledger" className={`rounded-lg px-3 py-1.5 text-sm font-medium ${view === "ledger" ? "bg-emerald-50 text-emerald-800" : "text-stone-600 hover:bg-stone-100"}`}>Ledger</Link>
+        <Link href="/payments?view=balances" className={`rounded-lg px-3 py-1.5 text-sm font-medium ${view === "balances" ? "bg-brand-50 text-brand-800" : "text-stone-600 hover:bg-stone-100"}`}>Balances</Link>
+        <Link href="/payments?view=ledger" className={`rounded-lg px-3 py-1.5 text-sm font-medium ${view === "ledger" ? "bg-brand-50 text-brand-800" : "text-stone-600 hover:bg-stone-100"}`}>Ledger</Link>
       </div>
 
       {view === "ledger" ? (
@@ -81,7 +81,7 @@ export default async function PaymentsPage({
                   <td><Link href={b.clientId ? `/clients/${b.clientId}` : `/teams/${b.teamId}`} className="font-medium hover:underline">{b.name}</Link>{b.teamId && <span className="text-stone-500"> (team)</span>}</td>
                   <td>{money(b.owedCents)}</td>
                   <td>{money(b.paidCents)}</td>
-                  <td className={b.dueCents > 0 ? "font-medium text-amber-700" : b.dueCents < 0 ? "text-sky-700" : "text-stone-400"}>
+                  <td className={b.dueCents > 0 ? "font-medium text-amber-700" : b.dueCents < 0 ? "text-violet-700" : "text-stone-400"}>
                     {b.dueCents < 0 ? `${money(-b.dueCents)} credit` : money(b.dueCents)}
                   </td>
                 </tr>

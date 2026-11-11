@@ -42,7 +42,7 @@ export function PackList({ packs }: { packs: PackRow[] }) {
               </div>
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100">
-              <div className="h-full bg-emerald-600" style={{ width: `${pct}%` }} />
+              <div className="h-full rounded-full bg-linear-to-r from-brand-400 to-brand-600" style={{ width: `${pct}%` }} />
             </div>
             <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
               <span>

@@ -4,8 +4,8 @@ import { PageHeader } from "@/components/ui";
 import { fmtTime } from "@/lib/format";
 
 const STATUS_CLS: Record<string, string> = {
-  SCHEDULED: "bg-sky-50 text-sky-800 border-sky-200",
-  COMPLETED: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  SCHEDULED: "bg-violet-50 text-violet-800 border-violet-200",
+  COMPLETED: "bg-brand-50 text-brand-800 border-brand-200",
   NO_SHOW: "bg-red-50 text-red-800 border-red-200",
   CANCELLED: "bg-stone-100 text-stone-500 border-stone-200 line-through",
 };
@@ -66,8 +66,8 @@ export default async function CalendarPage({
             return (
               <div key={k} className={`min-h-28 border-b border-r border-stone-100 p-1.5 ${inMonth ? "" : "bg-stone-50/60"}`}>
                 <div className="mb-1 flex items-center justify-between">
-                  <span className={`text-xs ${k === todayKey ? "rounded-full bg-emerald-700 px-1.5 py-0.5 font-semibold text-white" : inMonth ? "text-stone-700" : "text-stone-400"}`}>{d.getDate()}</span>
-                  <Link href={`/sessions/new?date=${k}`} className="text-xs text-stone-300 hover:text-emerald-700" title="Schedule">+</Link>
+                  <span className={`text-xs ${k === todayKey ? "rounded-full bg-brand-700 px-1.5 py-0.5 font-semibold text-white" : inMonth ? "text-stone-700" : "text-stone-400"}`}>{d.getDate()}</span>
+                  <Link href={`/sessions/new?date=${k}`} className="text-xs text-stone-300 hover:text-brand-700" title="Schedule">+</Link>
                 </div>
                 <ul className="space-y-1">
                   {list.map((s) => (

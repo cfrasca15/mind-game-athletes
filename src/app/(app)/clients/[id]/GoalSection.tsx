@@ -20,7 +20,7 @@ export function GoalSection({ clientId, goals }: { clientId: string; goals: Goal
             <div className="flex shrink-0 gap-2 text-xs">
               {g.status === "ACTIVE" ? (
                 <>
-                  <ConfirmButton className="text-emerald-700 hover:underline" action={setGoalStatusAction.bind(null, g.id, clientId, "ACHIEVED")} message="Mark this goal achieved?">Achieved</ConfirmButton>
+                  <ConfirmButton className="text-brand-700 hover:underline" action={setGoalStatusAction.bind(null, g.id, clientId, "ACHIEVED")} message="Mark this goal achieved?">Achieved</ConfirmButton>
                   <ConfirmButton className="text-stone-500 hover:underline" action={setGoalStatusAction.bind(null, g.id, clientId, "DROPPED")} message="Drop this goal?">Drop</ConfirmButton>
                 </>
               ) : (
@@ -32,7 +32,7 @@ export function GoalSection({ clientId, goals }: { clientId: string; goals: Goal
         ))}
       </ul>
       <details className="mt-3">
-        <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Add goal</summary>
+        <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Add goal</summary>
         <form action={saveGoalAction} className="mt-3 space-y-3">
           <input type="hidden" name="clientId" value={clientId} />
           <Field label="Goal"><input name="title" required className="input" placeholder="Stay composed after a mistake" /></Field>

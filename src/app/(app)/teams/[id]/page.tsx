@@ -95,7 +95,7 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
             <h2 className="mb-3 font-semibold text-stone-900">Packages</h2>
             <PackList packs={team.clientPackages} />
             <details className="mt-3">
-              <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Add package</summary>
+              <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Add package</summary>
               <div className="mt-3"><PurchaseForm packages={catalog} teamId={team.id} /></div>
             </details>
           </section>
@@ -103,7 +103,7 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
             <h2 className="mb-3 font-semibold text-stone-900">Payments</h2>
             <PaymentList payments={team.payments} />
             <details className="mt-3">
-              <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Record payment</summary>
+              <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Record payment</summary>
               <div className="mt-3"><PaymentForm teamId={team.id} packs={team.clientPackages.filter((p) => p.status !== "CANCELLED")} defaultAmountCents={balance.dueCents} /></div>
             </details>
           </section>

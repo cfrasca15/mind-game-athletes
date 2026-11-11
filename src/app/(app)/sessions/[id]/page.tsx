@@ -121,7 +121,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   <li key={p.id} className="py-2 text-sm">
                     <Link href={`/sessions/${p.id}`} className="font-medium hover:underline">{fmtDateTime(p.startsAt)}</Link>
                     {p.notes && <p className="mt-1 line-clamp-4 whitespace-pre-line text-stone-600">{p.notes}</p>}
-                    {p.nextFocus && <p className="mt-1 text-xs text-emerald-800"><span className="font-medium">Next:</span> {p.nextFocus}</p>}
+                    {p.nextFocus && <p className="mt-1 text-xs text-brand-800"><span className="font-medium">Next:</span> {p.nextFocus}</p>}
                   </li>
                 ))}
               </ul>

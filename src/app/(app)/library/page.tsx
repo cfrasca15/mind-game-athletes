@@ -71,7 +71,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
                   <Link href={`/library/${h.bookId}/${h.id}?q=${encodeURIComponent(q)}`} className="font-medium text-stone-900 hover:underline">{h.title}</Link>
                   <span className="text-stone-500"> · {h.book.title}{inText > 0 && ` · ${inText} mention${inText === 1 ? "" : "s"}`}</span>
                   {fromText && <p className="mt-1 text-stone-600"><Marked text={fromText} mark={q} /></p>}
-                  {fromNotes && <p className="mt-1 text-emerald-800"><span className="font-medium">Your notes:</span> <Marked text={fromNotes} mark={q} /></p>}
+                  {fromNotes && <p className="mt-1 text-brand-800"><span className="font-medium">Your notes:</span> <Marked text={fromNotes} mark={q} /></p>}
                 </li>
               );
             })}
@@ -82,7 +82,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
           <div className="space-y-3 lg:col-span-2">
             {books.length === 0 && <Empty>No books yet. Add your first one on the right.</Empty>}
             {books.map((b) => (
-              <Link key={b.id} href={`/library/${b.id}`} className="card block hover:border-emerald-300">
+              <Link key={b.id} href={`/library/${b.id}`} className="card block hover:border-brand-300">
                 <div className="font-semibold text-stone-900">{b.title}</div>
                 <div className="mt-1 text-sm text-stone-500">{b.author ? `${b.author} · ` : ""}{b._count.chapters} chapter{b._count.chapters === 1 ? "" : "s"}</div>
               </Link>

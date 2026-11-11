@@ -25,8 +25,8 @@ export default async function ChapterPage({
 
   const pager = (
     <div className="flex items-start justify-between gap-4 text-sm">
-      {prev ? <Link href={`/library/${id}/${prev.id}`} className="text-stone-500 hover:text-emerald-800">← {prev.title}</Link> : <span />}
-      {next ? <Link href={`/library/${id}/${next.id}`} className="text-right text-stone-500 hover:text-emerald-800">{next.title} →</Link> : <span />}
+      {prev ? <Link href={`/library/${id}/${prev.id}`} className="text-stone-500 hover:text-brand-800">← {prev.title}</Link> : <span />}
+      {next ? <Link href={`/library/${id}/${next.id}`} className="text-right text-stone-500 hover:text-brand-800">{next.title} →</Link> : <span />}
     </div>
   );
 

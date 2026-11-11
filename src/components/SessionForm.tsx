@@ -93,7 +93,7 @@ export function SessionForm({
         </Field>
         <Field label="Plan for this session" className="sm:col-span-2">
           <textarea name="prepNotes" defaultValue={s?.prepNotes ?? defaultPrepNotes ?? ""} className="input" placeholder="What to cover…" />
-          <a href="/library" target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-medium text-emerald-800 hover:underline">Look something up in the Library (opens in a new tab)</a>
+          <a href="/library" target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-medium text-brand-800 hover:underline">Look something up in the Library (opens in a new tab)</a>
         </Field>
       </section>
       <button className="btn-primary">{submitLabel}</button>

@@ -1,46 +1,97 @@
 @import "tailwindcss";
 
-:root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+/*
+ * Theme. The whole app is colored from three palettes:
+ *   brand-*   the teal blue below (buttons, links, highlights, "done")
+ *   stone-*   Tailwind's warm gray (text, borders)
+ *   violet-*  a quiet lavender for "scheduled"
+ * Change the ten brand values to re-theme everything.
+ */
+@theme {
+  --color-brand-50: #effafa;
+  --color-brand-100: #d9f1f2;
+  --color-brand-200: #b6e2e5;
+  --color-brand-300: #85cdd3;
+  --color-brand-400: #4fb0ba;
+  --color-brand-500: #2f95a1;
+  --color-brand-600: #237a87;
+  --color-brand-700: #1f6470;
+  --color-brand-800: #1e525c;
+  --color-brand-900: #1c444d;
+}
+
+/* Fonts are loaded in src/app/layout.tsx and exposed as CSS variables. */
+@theme inline {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-heading), Georgia, "Times New Roman", serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--color-stone-900);
+  /* Warm ivory with a faint teal wash top-right and a champagne one top-left. */
+  background:
+    radial-gradient(55rem 26rem at 100% -10%, rgb(133 205 211 / 0.2), transparent 60%),
+    radial-gradient(45rem 24rem at 0% -10%, rgb(234 217 181 / 0.22), transparent 60%),
+    #faf8f5;
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.005em;
+}
+
+::selection {
+  background: var(--color-brand-200);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-brand-600);
+}
+
+summary {
+  cursor: pointer;
 }
 
 @layer components {
   .label {
-    @apply mb-1 block text-xs font-medium uppercase tracking-wide text-stone-500;
+    @apply mb-1 block text-[0.7rem] font-semibold uppercase tracking-wider text-stone-500;
   }
   .input {
-    @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-stone-100;
+    @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-xs outline-none transition placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 disabled:bg-stone-100;
   }
   textarea.input {
     @apply min-h-24;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white shadow-xs hover:bg-emerald-800 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-1 rounded-full bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-900/20 transition hover:bg-brand-800 hover:shadow-md hover:shadow-brand-900/20 disabled:opacity-60;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-xs hover:bg-stone-50 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-1 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-xs transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 disabled:opacity-60;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60;
+    @apply inline-flex items-center justify-center rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60;
   }
   .card {
-    @apply rounded-2xl border border-stone-200 bg-white p-5 shadow-xs;
+    @apply rounded-2xl border border-stone-200/80 bg-white p-5 shadow-[0_1px_2px_rgb(28_68_77_/_0.04),0_12px_28px_-16px_rgb(28_68_77_/_0.22)];
   }
   .pill {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  /* The business name, set in the heading serif. */
+  .wordmark {
+    @apply font-semibold text-brand-800;
+    font-family: var(--font-display);
+    letter-spacing: 0.005em;
   }
   .table {
     @apply w-full text-sm;
   }
   .table th {
-    @apply border-b border-stone-200 px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-stone-500;
+    @apply border-b border-stone-200 px-3 py-2 text-left text-[0.7rem] font-semibold uppercase tracking-wider text-stone-500;
   }
   .table td {
     @apply border-b border-stone-100 px-3 py-2 align-top;

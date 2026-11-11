@@ -105,7 +105,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
             <h2 className="mb-3 font-semibold text-stone-900">Packages</h2>
             <PackList packs={client.clientPackages} />
             <details className="mt-3">
-              <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Add package</summary>
+              <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Add package</summary>
               <div className="mt-3"><PurchaseForm packages={catalog} clientId={client.id} /></div>
             </details>
           </section>
@@ -114,7 +114,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
             <h2 className="mb-3 font-semibold text-stone-900">Payments</h2>
             <PaymentList payments={client.payments} />
             <details className="mt-3">
-              <summary className="cursor-pointer text-sm font-medium text-emerald-800">+ Record payment</summary>
+              <summary className="cursor-pointer text-sm font-medium text-brand-800">+ Record payment</summary>
               <div className="mt-3">
                 <PaymentForm clientId={client.id} packs={client.clientPackages.filter((p) => p.status !== "CANCELLED")} defaultAmountCents={balance.dueCents} />
               </div>
