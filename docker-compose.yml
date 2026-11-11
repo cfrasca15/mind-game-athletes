@@ -1,0 +1,14 @@
+services:
+  mind-game-athletes:
+    build: .
+    container_name: mind-game-athletes
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file:
+      - docker.env
+    volumes:
+      - mga-data:/app/data
+
+volumes:
+  mga-data:

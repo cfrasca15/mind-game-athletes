@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// The one login: Mind Game Athletes' owner.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+enum ClientStatus {
+  ACTIVE
+  PAUSED
+  FORMER
+}
+
+// A team/club she works with. Players may belong to one, and team sessions
+// are booked against the team rather than an individual.
+model Team {
+  id         String       @id @default(cuid())
+  name       String
+  club       String?
+  ageGroup   String?
+  coachName  String?
+  coachEmail String?
+  coachPhone String?
+  notes      String?
+  status     ClientStatus @default(ACTIVE)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  clients        Client[]
+  sessions       Session[]
+  clientPackages ClientPackage[]
+  payments       Payment[]
+}
+
+// A player.
+model Client {
+  id          String       @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  dateOfBirth DateTime?
+  position    String?
+  school      String?
+  gradYear    Int?
+  status      ClientStatus @default(ACTIVE)
+  teamId      String?
+  team        Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  // Intake. Remove what she doesn't use.
+  coachName     String?
+  injuryHistory String?
+  referredBy    String?
+  goalsAtIntake String?
+  consentOnFile Boolean   @default(false)
+  consentDate   DateTime?
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guardians      Guardian[]
+  sessions       Session[]
+  clientPackages ClientPackage[]
+  payments       Payment[]
+  goals          Goal[]
+}
+
+// Parent / guardian. Most players are minors.
+model Guardian {
+  id             String  @id @default(cuid())
+  clientId       String
+  client         Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name           String
+  relationship   String?
+  phone          String?
+  email          String?
+  isPrimary      Boolean @default(true)
+  billingContact Boolean @default(true)
+}
+
+// Catalog of what she sells: single sessions, multi-packs, team programs.
+model Package {
+  id           String   @id @default(cuid())
+  name         String
+  sessionCount Int
+  priceCents   Int
+  expiresDays  Int?
+  forTeams     Boolean  @default(false)
+  active       Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  clientPackages ClientPackage[]
+}
+
+enum ClientPackageStatus {
+  ACTIVE
+  EXHAUSTED
+  EXPIRED
+  CANCELLED
+}
+
+// One purchase of a package by a client (or a team). Sessions used is
+// derived from completed sessions linked to it.
+model ClientPackage {
+  id           String              @id @default(cuid())
+  clientId     String?
+  client       Client?             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  teamId       String?
+  team         Team?               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  packageId    String
+  package      Package             @relation(fields: [packageId], references: [id])
+  // Snapshotted at purchase so later catalog edits don't rewrite history.
+  name         String
+  sessionCount Int
+  priceCents   Int
+  purchasedAt  DateTime            @default(now())
+  expiresAt    DateTime?
+  status       ClientPackageStatus @default(ACTIVE)
+  notes        String?
+
+  sessions Session[]
+  payments Payment[]
+}
+
+enum SessionType {
+  IN_PERSON
+  VIDEO
+  PHONE
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+}
+
+// A meeting with a player or a team.
+model Session {
+  id              String         @id @default(cuid())
+  clientId        String?
+  client          Client?        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  teamId          String?
+  team            Team?          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  clientPackageId String?
+  clientPackage   ClientPackage? @relation(fields: [clientPackageId], references: [id], onDelete: SetNull)
+  startsAt        DateTime
+  durationMin     Int            @default(60)
+  type            SessionType    @default(IN_PERSON)
+  status          SessionStatus  @default(SCHEDULED)
+  location        String?
+  title           String?
+  // Written before the session: what to cover.
+  prepNotes       String?
+  // Written after.
+  notes           String?
+  // Pulled forward as prepNotes for the next session.
+  nextFocus       String?
+  // Single-session price when not drawn from a pack.
+  priceCents      Int?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  payments Payment[]
+
+  @@index([startsAt])
+}
+
+enum PaymentMethod {
+  VENMO
+  ZELLE
+  CASH
+  CARD
+  CHECK
+  OTHER
+}
+
+model Payment {
+  id              String         @id @default(cuid())
+  clientId        String?
+  client          Client?        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  teamId          String?
+  team            Team?          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  clientPackageId String?
+  clientPackage   ClientPackage? @relation(fields: [clientPackageId], references: [id], onDelete: SetNull)
+  sessionId       String?
+  session         Session?       @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  amountCents     Int
+  paidAt          DateTime       @default(now())
+  method          PaymentMethod  @default(VENMO)
+  note            String?
+  createdAt       DateTime       @default(now())
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  DROPPED
+}
+
+model Goal {
+  id        String     @id @default(cuid())
+  clientId  String
+  client    Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title     String
+  detail    String?
+  status    GoalStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
