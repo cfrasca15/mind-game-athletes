@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/teams", label: "Teams" },
   { href: "/calendar", label: "Calendar" },
   { href: "/payments", label: "Payments" },
+  { href: "/library", label: "Library" },
   { href: "/settings", label: "Settings" },
 ];
 

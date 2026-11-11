@@ -242,3 +242,35 @@ model GoogleCalendar {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
+
+// Books she works from. She uploads her own copy; the text lives only in
+// this database, never in the code repository.
+model Book {
+  id        String   @id @default(cuid())
+  title     String
+  author    String?
+  // Her notes on the book as a whole.
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapters BookChapter[]
+}
+
+model BookChapter {
+  id        String  @id @default(cuid())
+  bookId    String
+  book      Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  position  Int
+  title     String
+  // A part or section title page rather than a chapter to read.
+  isDivider Boolean @default(false)
+  // JSON array of blocks; see src/lib/epub.ts.
+  content   String
+  // The same words as plain text, for search.
+  text      String
+  // Her own takeaways.
+  notes     String?
+
+  @@index([bookId, position])
+}

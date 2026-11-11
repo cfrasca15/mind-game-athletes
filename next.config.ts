@@ -14,7 +14,8 @@ const nextConfig: NextConfig = {
     },
   },
   experimental: {
-    serverActions: { allowedOrigins },
+    // bodySizeLimit: room for an uploaded book file (Library). Default is 1 MB.
+    serverActions: { allowedOrigins, bodySizeLimit: "25mb" },
   },
 };
 
