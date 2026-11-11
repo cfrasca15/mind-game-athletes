@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { date, int, str } from "@/lib/format";
+import { removeEvents, syncUpcoming } from "@/lib/google-sync";
 import type { ClientStatus, GoalStatus } from "@/generated/prisma/enums";
 
 function clientData(fd: FormData) {
@@ -58,6 +59,8 @@ export async function updateClientAction(id: string, fd: FormData) {
   const data = clientData(fd);
   if (!data.firstName || !data.lastName) throw new Error("First and last name are required.");
   await prisma.client.update({ where: { id }, data });
+  // Keep event titles in step with a renamed player.
+  await syncUpcoming({ clientId: id });
   revalidatePath("/clients");
   revalidatePath(`/clients/${id}`);
   redirect(`/clients/${id}`);
@@ -65,7 +68,9 @@ export async function updateClientAction(id: string, fd: FormData) {
 
 export async function deleteClientAction(id: string) {
   await requireUser();
+  const events = await prisma.session.findMany({ where: { clientId: id, googleEventId: { not: null } }, select: { googleEventId: true } });
   await prisma.client.delete({ where: { id } });
+  await removeEvents(events.map((e) => e.googleEventId));
   revalidatePath("/clients");
   redirect("/clients");
 }

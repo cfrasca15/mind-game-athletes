@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { str } from "@/lib/format";
+import { removeEvents, syncUpcoming } from "@/lib/google-sync";
 import type { ClientStatus } from "@/generated/prisma/enums";
 
 function teamData(fd: FormData) {
@@ -34,6 +35,7 @@ export async function updateTeamAction(id: string, fd: FormData) {
   const data = teamData(fd);
   if (!data.name) throw new Error("Team name is required.");
   await prisma.team.update({ where: { id }, data });
+  await syncUpcoming({ teamId: id });
   revalidatePath("/teams");
   revalidatePath(`/teams/${id}`);
   redirect(`/teams/${id}`);
@@ -41,7 +43,9 @@ export async function updateTeamAction(id: string, fd: FormData) {
 
 export async function deleteTeamAction(id: string) {
   await requireUser();
+  const events = await prisma.session.findMany({ where: { teamId: id, googleEventId: { not: null } }, select: { googleEventId: true } });
   await prisma.team.delete({ where: { id } });
+  await removeEvents(events.map((e) => e.googleEventId));
   revalidatePath("/teams");
   revalidatePath("/clients");
   redirect("/teams");

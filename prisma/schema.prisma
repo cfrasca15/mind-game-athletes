@@ -171,6 +171,9 @@ model Session {
   nextFocus       String?
   // Single-session price when not drawn from a pack.
   priceCents      Int?
+  // Google Calendar event this session is mirrored to, when sync is connected.
+  googleEventId   String?
+  googleSyncError String?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
@@ -220,4 +223,22 @@ model Goal {
   status    GoalStatus @default(ACTIVE)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+}
+
+// The Google Calendar that sessions are pushed to. One row (id 1) or none.
+// Holds a service-account key, so treat database backups as sensitive.
+model GoogleCalendar {
+  id          Int       @id @default(1)
+  clientEmail String
+  privateKey  String
+  calendarId  String
+  // Event titles use "Maya A." unless this is on.
+  fullNames   Boolean   @default(false)
+  // Where the CRM is reached, for the link back in each event.
+  appUrl      String?
+  lastSyncAt  DateTime?
+  lastError   String?
+  lastErrorAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }

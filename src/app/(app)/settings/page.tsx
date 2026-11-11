@@ -3,11 +3,16 @@ import { requireUser } from "@/lib/auth";
 import { deletePackageAction, savePackageAction, togglePackageActiveAction } from "@/lib/actions/packages";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { Field, PageHeader } from "@/components/ui";
-import { money } from "@/lib/format";
+import { fmtDateTime, money } from "@/lib/format";
+import { syncStatus } from "@/lib/google-sync";
 import { ProfileForms } from "./ProfileForms";
+import { GoogleCalendarCard } from "./GoogleCalendarCard";
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const g = await syncStatus();
+  // Dates are formatted here so server and browser render the same text.
+  const google = g && { ...g, lastSyncAt: g.lastSyncAt ? fmtDateTime(g.lastSyncAt) : null, lastErrorAt: g.lastErrorAt ? fmtDateTime(g.lastErrorAt) : null };
   const packages = await prisma.package.findMany({
     orderBy: [{ active: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
     include: { _count: { select: { clientPackages: true } } },
@@ -50,6 +55,7 @@ export default async function SettingsPage() {
               <div className="mt-3"><PackageForm /></div>
             </details>
           </section>
+          <GoogleCalendarCard status={google} />
         </div>
         <div className="space-y-6">
           <ProfileForms name={user.name} email={user.email} />

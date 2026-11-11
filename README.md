@@ -7,6 +7,7 @@ Single-user CRM for a mental-performance coach working with youth soccer players
 - **Packages**: a catalog of single sessions, multi-packs and team programs. Buying one for a player creates a pack; completing a session uses one up.
 - **Sessions**: schedule, write a plan beforehand, notes afterwards, and a "focus for next time" that is pulled forward into the next session's plan.
 - **Payments**: record payments against packs or single sessions; balances are computed per player/team.
+- **Google Calendar** (optional): sessions booked here are mirrored one-way onto a Google Calendar. Setup is in [docs/GOOGLE-CALENDAR.md](docs/GOOGLE-CALENDAR.md).
 
 Stack: Next.js 16 (App Router, Server Actions), Prisma 7 on SQLite, Tailwind 4. Same shape as `medicare-crm`.
 

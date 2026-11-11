@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/sessions";
 import { BackLink, Field, PageHeader, Pill } from "@/components/ui";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { retryGoogleSyncAction } from "@/lib/actions/google";
 import { SESSION_STATUS_LABEL, SESSION_TYPE_LABEL, fmtDateTime, fullName, money } from "@/lib/format";
 
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
@@ -50,6 +51,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             {s.clientPackage
               ? ` · ${s.clientPackage.name} (${s.clientPackage._count.sessions} of ${s.clientPackage.sessionCount} used)`
               : s.priceCents != null ? ` · single session ${money(s.priceCents)}` : " · single session"}
+            {s.googleEventId && !s.googleSyncError && " · on Google Calendar"}
           </>
         }
         actions={
@@ -62,6 +64,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           </>
         }
       />
+
+      {s.googleSyncError && (
+        <form action={retryGoogleSyncAction.bind(null, s.id)} className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <span><span className="font-medium">Google Calendar did not update.</span> {s.googleSyncError}</span>
+          <button className="btn">Try again</button>
+        </form>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -85,7 +94,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <button className="btn-primary">{isOpen ? "Save & mark completed" : "Save notes"}</button>
                 {isOpen && (
                   <>
-                    <ConfirmButton className="btn" action={setSessionStatusAction.bind(null, s.id, "NO_SHOW")} message="Mark as no-show? It will still count against the pack unless you change it.">No-show</ConfirmButton>
+                    <ConfirmButton className="btn" action={setSessionStatusAction.bind(null, s.id, "NO_SHOW")} message="Mark as no-show? It will not use a session from the pack.">No-show</ConfirmButton>
                     <ConfirmButton className="btn" action={setSessionStatusAction.bind(null, s.id, "CANCELLED")} message="Cancel this session? It will not count against the pack.">Cancelled</ConfirmButton>
                   </>
                 )}

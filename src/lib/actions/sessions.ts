@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { date, int, parseMoney, str } from "@/lib/format";
 import { defaultPackageFor, refreshPackageStatus } from "@/lib/packages";
+import { removeEvents, syncSession } from "@/lib/google-sync";
 import type { SessionStatus, SessionType } from "@/generated/prisma/enums";
 
 async function resolvePackage(fd: FormData, clientId: string | null, teamId: string | null) {
@@ -39,6 +40,7 @@ export async function createSessionAction(fd: FormData) {
       priceCents: clientPackageId ? null : priceStr ? parseMoney(priceStr) : null,
     },
   });
+  await syncSession(session.id);
   revalidate(clientId, teamId);
   redirect(str(fd.get("returnTo")) ?? `/sessions/${session.id}`);
 }
@@ -68,6 +70,7 @@ export async function updateSessionAction(id: string, fd: FormData) {
   });
   if (existing.clientPackageId) await refreshPackageStatus(existing.clientPackageId);
   if (clientPackageId) await refreshPackageStatus(clientPackageId);
+  await syncSession(id);
   revalidate(existing.clientId, existing.teamId);
   redirect(`/sessions/${id}`);
 }
@@ -102,6 +105,7 @@ export async function saveSessionNotesAction(id: string, fd: FormData) {
 export async function setSessionStatusAction(id: string, status: SessionStatus) {
   await requireUser();
   const s = await prisma.session.update({ where: { id }, data: { status } });
+  await syncSession(id);
   if (s.clientPackageId) await refreshPackageStatus(s.clientPackageId);
   revalidate(s.clientId, s.teamId);
   revalidatePath(`/sessions/${id}`);
@@ -110,6 +114,7 @@ export async function setSessionStatusAction(id: string, status: SessionStatus) 
 export async function deleteSessionAction(id: string) {
   await requireUser();
   const s = await prisma.session.delete({ where: { id } });
+  await removeEvents([s.googleEventId]);
   if (s.clientPackageId) await refreshPackageStatus(s.clientPackageId);
   revalidate(s.clientId, s.teamId);
   redirect(s.clientId ? `/clients/${s.clientId}` : s.teamId ? `/teams/${s.teamId}` : "/calendar");
