@@ -228,19 +228,24 @@ model Goal {
 // The Google Calendar that sessions are pushed to. One row (id 1) or none.
 // Holds a service-account key, so treat database backups as sensitive.
 model GoogleCalendar {
-  id          Int       @id @default(1)
-  clientEmail String
-  privateKey  String
-  calendarId  String
+  id           Int       @id @default(1)
+  // Signed in with Google: who, and the long-lived token that keeps it working.
+  accountEmail String?
+  refreshToken String?
+  // Or a service account key pasted in (the other way to connect).
+  clientEmail  String?
+  privateKey   String?
+  // "primary" is the main calendar of the signed-in account.
+  calendarId   String
   // Event titles use "Maya A." unless this is on.
-  fullNames   Boolean   @default(false)
+  fullNames    Boolean   @default(false)
   // Where the CRM is reached, for the link back in each event.
-  appUrl      String?
-  lastSyncAt  DateTime?
-  lastError   String?
-  lastErrorAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  appUrl       String?
+  lastSyncAt   DateTime?
+  lastError    String?
+  lastErrorAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 // Books she works from. She uploads her own copy; the text lives only in

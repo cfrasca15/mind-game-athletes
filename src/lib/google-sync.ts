@@ -1,5 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { deleteEvent, insertEvent, updateEvent, GoogleError, type GoogleCreds, type GoogleEvent } from "@/lib/google";
+import {
+  deleteEvent,
+  insertEvent,
+  updateEvent,
+  testCalendarAccess,
+  GoogleError,
+  PRIMARY_CALENDAR,
+  type GoogleCreds,
+  type GoogleEvent,
+  type OAuthCreds,
+} from "@/lib/google";
 import { SESSION_TYPE_LABEL } from "@/lib/format";
 
 /**
@@ -12,11 +22,17 @@ import { SESSION_TYPE_LABEL } from "@/lib/format";
 
 type Config = NonNullable<Awaited<ReturnType<typeof getConfig>>>;
 
-function getConfig() {
-  return prisma.googleCalendar.findUnique({ where: { id: 1 } });
+/** The saved connection plus how to sign in with it, or null when not connected. */
+async function getConfig() {
+  const row = await prisma.googleCalendar.findUnique({ where: { id: 1 } });
+  if (!row) return null;
+  const creds: GoogleCreds | null = row.refreshToken
+    ? { kind: "oauth", refreshToken: row.refreshToken }
+    : row.clientEmail && row.privateKey
+      ? { kind: "service", clientEmail: row.clientEmail, privateKey: row.privateKey }
+      : null;
+  return creds ? { ...row, creds } : null;
 }
-
-const creds = (c: Config): GoogleCreds => ({ clientEmail: c.clientEmail, privateKey: c.privateKey });
 
 const sessionInclude = {
   client: { select: { firstName: true, lastName: true } },
@@ -57,20 +73,20 @@ async function pushOne(cfg: Config, s: SyncSession): Promise<boolean> {
   try {
     let eventId: string | null = s.googleEventId;
     if (s.status === "CANCELLED") {
-      if (eventId) await deleteEvent(creds(cfg), cfg.calendarId, eventId);
+      if (eventId) await deleteEvent(cfg.creds, cfg.calendarId, eventId);
       eventId = null;
     } else {
       const event = eventFor(cfg, s);
       if (eventId) {
         try {
-          await updateEvent(creds(cfg), cfg.calendarId, eventId, event);
+          await updateEvent(cfg.creds, cfg.calendarId, eventId, event);
         } catch (e) {
           // Event was removed on the Google side: put it back.
           if (!(e instanceof GoogleError && e.notFound)) throw e;
-          eventId = await insertEvent(creds(cfg), cfg.calendarId, event);
+          eventId = await insertEvent(cfg.creds, cfg.calendarId, event);
         }
       } else {
-        eventId = await insertEvent(creds(cfg), cfg.calendarId, event);
+        eventId = await insertEvent(cfg.creds, cfg.calendarId, event);
       }
     }
     // updateMany: the session may have been deleted while we were talking to Google.
@@ -110,7 +126,7 @@ export async function removeEvents(eventIds: (string | null)[]): Promise<void> {
     if (!cfg) return;
     for (const id of ids) {
       try {
-        await deleteEvent(creds(cfg), cfg.calendarId, id);
+        await deleteEvent(cfg.creds, cfg.calendarId, id);
       } catch (e) {
         const message = e instanceof Error ? e.message : "Unknown error talking to Google.";
         await prisma.googleCalendar.updateMany({
@@ -162,6 +178,82 @@ export async function syncUpcoming(owner: { clientId?: string; teamId?: string }
   return result;
 }
 
+/**
+ * Saves a connection that has already been tested, then pushes what is
+ * booked. If the events will now land somewhere else, the old event ids are
+ * forgotten so everything is created fresh there.
+ */
+export async function saveConnection(input: {
+  creds: GoogleCreds;
+  accountEmail?: string | null;
+  calendarId: string;
+  appUrl: string | null;
+  fullNames?: boolean;
+}): Promise<{ ok: number; failed: number }> {
+  const { creds, calendarId } = input;
+  const accountEmail = creds.kind === "oauth" ? (input.accountEmail ?? null) : null;
+  const existing = await prisma.googleCalendar.findUnique({ where: { id: 1 } });
+  if (existing) {
+    // "primary" means a different calendar for each account that signs in.
+    const sameCalendar =
+      existing.calendarId === calendarId &&
+      (calendarId !== PRIMARY_CALENDAR || (!!accountEmail && existing.accountEmail === accountEmail));
+    if (!sameCalendar) await prisma.session.updateMany({ data: { googleEventId: null, googleSyncError: null } });
+  }
+  const data = {
+    accountEmail,
+    refreshToken: creds.kind === "oauth" ? creds.refreshToken : null,
+    clientEmail: creds.kind === "service" ? creds.clientEmail : null,
+    privateKey: creds.kind === "service" ? creds.privateKey : null,
+    calendarId,
+    appUrl: input.appUrl,
+    lastError: null,
+    lastErrorAt: null,
+    ...(input.fullNames === undefined ? {} : { fullNames: input.fullNames }),
+  };
+  await prisma.googleCalendar.upsert({ where: { id: 1 }, create: { id: 1, ...data }, update: data });
+  return syncUpcoming();
+}
+
+/**
+ * Finishes "Connect Google Calendar". Uses the account's main calendar, or
+ * keeps the calendar she picked earlier when the same account signs in again.
+ * Throws a GoogleError with a readable message if Google will not let us write.
+ */
+export async function connectSignedIn(creds: OAuthCreds, accountEmail: string | null, appUrl: string | null) {
+  const existing = await prisma.googleCalendar.findUnique({ where: { id: 1 } });
+  const sameAccount = !!existing?.refreshToken && !!accountEmail && existing.accountEmail === accountEmail;
+  const calendarId = sameAccount ? existing.calendarId : PRIMARY_CALENDAR;
+  await testCalendarAccess(creds, calendarId);
+  return saveConnection({ creds, accountEmail, calendarId, appUrl });
+}
+
+/**
+ * Sends sessions to a different calendar from now on. Upcoming events are
+ * taken off the old one so nothing shows twice. Throws if the new calendar
+ * cannot be written to, leaving everything as it was.
+ */
+export async function moveToCalendar(calendarId: string): Promise<{ ok: number; failed: number }> {
+  const cfg = await getConfig();
+  if (!cfg) throw new Error("Google Calendar is not connected.");
+  if (calendarId === cfg.calendarId) return syncUpcoming();
+  await testCalendarAccess(cfg.creds, calendarId);
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const old = await prisma.session.findMany({
+    where: { startsAt: { gte: startOfToday }, googleEventId: { not: null } },
+    select: { googleEventId: true },
+  });
+  for (const s of old) {
+    // Best effort: a leftover event on the old calendar is not worth failing for.
+    await deleteEvent(cfg.creds, cfg.calendarId, s.googleEventId!).catch(() => {});
+  }
+  await prisma.session.updateMany({ data: { googleEventId: null, googleSyncError: null } });
+  await prisma.googleCalendar.updateMany({ where: { id: 1 }, data: { calendarId, lastError: null, lastErrorAt: null } });
+  return syncUpcoming();
+}
+
 /** For Settings: how the mirror is doing. */
 export async function syncStatus() {
   const cfg = await getConfig();
@@ -174,7 +266,10 @@ export async function syncStatus() {
     prisma.session.count({ where: { startsAt: { gte: startOfToday }, googleSyncError: { not: null } } }),
   ]);
   return {
-    clientEmail: cfg.clientEmail,
+    signedIn: cfg.creds.kind === "oauth",
+    // Who the calendar has to be reachable by: the signed-in account, or the service account.
+    account: cfg.creds.kind === "oauth" ? cfg.accountEmail : cfg.creds.clientEmail,
+    mainCalendar: cfg.calendarId === PRIMARY_CALENDAR,
     calendarId: cfg.calendarId,
     fullNames: cfg.fullNames,
     lastSyncAt: cfg.lastSyncAt,

@@ -1,15 +1,25 @@
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { deletePackageAction, savePackageAction, togglePackageActiveAction } from "@/lib/actions/packages";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { Field, PageHeader } from "@/components/ui";
 import { fmtDateTime, money } from "@/lib/format";
+import { oauthSettings } from "@/lib/google";
+import { NOTICE_COOKIE, OUTCOME_TEXT, type GoogleOutcome } from "@/lib/google-flow";
 import { syncStatus } from "@/lib/google-sync";
 import { ProfileForms } from "./ProfileForms";
 import { GoogleCalendarCard } from "./GoogleCalendarCard";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ google?: string }> }) {
   const user = await requireUser();
+  // Set when she has just come back from signing in with Google.
+  const outcome = (await searchParams).google;
+  let notice = outcome && outcome in OUTCOME_TEXT ? OUTCOME_TEXT[outcome as GoogleOutcome] : null;
+  if (outcome === "failed") {
+    const reason = (await cookies()).get(NOTICE_COOKIE)?.value;
+    if (reason) notice = { ok: false, text: reason };
+  }
   const g = await syncStatus();
   // Dates are formatted here so server and browser render the same text.
   const google = g && { ...g, lastSyncAt: g.lastSyncAt ? fmtDateTime(g.lastSyncAt) : null, lastErrorAt: g.lastErrorAt ? fmtDateTime(g.lastErrorAt) : null };
@@ -55,7 +65,7 @@ export default async function SettingsPage() {
               <div className="mt-3"><PackageForm /></div>
             </details>
           </section>
-          <GoogleCalendarCard status={google} />
+          <GoogleCalendarCard status={google} canSignIn={oauthSettings() !== null} notice={notice} />
         </div>
         <div className="space-y-6">
           <ProfileForms name={user.name} email={user.email} />
