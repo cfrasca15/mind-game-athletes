@@ -75,6 +75,22 @@ export async function updateSessionAction(id: string, fd: FormData) {
   redirect(`/sessions/${id}`);
 }
 
+const MAX_PLAN = 50_000;
+
+/** Save just the plan for a session. Called from the plan box as she writes. */
+export async function savePlanAction(id: string, plan: string): Promise<{ ok: true } | { ok: false; message: string }> {
+  await requireUser();
+  if (typeof id !== "string" || typeof plan !== "string") return { ok: false, message: "Could not save the plan." };
+  if (plan.length > MAX_PLAN) return { ok: false, message: "That plan is too long to save. Trim it a little." };
+  const text = plan.replace(/\r\n?/g, "\n").trim();
+  const found = await prisma.session.updateMany({ where: { id }, data: { prepNotes: text === "" ? null : text } });
+  if (found.count === 0) return { ok: false, message: "This session no longer exists." };
+  const s = await prisma.session.findUnique({ where: { id }, select: { clientId: true, teamId: true } });
+  revalidate(s?.clientId ?? null, s?.teamId ?? null);
+  revalidatePath(`/sessions/${id}`);
+  return { ok: true };
+}
+
 /** Save post-session notes and mark the session completed. */
 export async function completeSessionAction(id: string, fd: FormData) {
   await requireUser();

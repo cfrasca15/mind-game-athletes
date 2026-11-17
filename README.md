@@ -5,7 +5,8 @@ Single-user CRM for a mental-performance coach working with youth soccer players
 - **Players** with parents/guardians, intake details, goals, session history.
 - **Teams** that players can belong to, with their own sessions and billing.
 - **Packages**: a catalog of single sessions, multi-packs and team programs. Buying one for a player creates a pack; completing a session uses one up.
-- **Sessions**: schedule, write a plan beforehand, notes afterwards, and a "focus for next time" that is pulled forward into the next session's plan.
+- **Sessions**: schedule, write a plan beforehand, notes afterwards, and a "focus for next time" that is pulled forward into the next session's plan. Upcoming sessions can be planned right in the Today and Upcoming lists, or on the session page.
+- **Outline**: the outline she follows during a meeting, kept on its own page. It opens from a dropdown beside the notes on every session page, and a plan can be started from it.
 - **Payments**: record payments against packs or single sessions; balances are computed per player/team.
 - **Google Calendar** (optional): connect by signing in with Google, and sessions booked here are mirrored one-way onto the calendar. Setup is in [docs/GOOGLE-CALENDAR.md](docs/GOOGLE-CALENDAR.md).
 - **Library**: upload an EPUB of a book she works from, read it by chapter, search it, and keep her own notes per chapter. Book text is stored only in the database, never in this repository.

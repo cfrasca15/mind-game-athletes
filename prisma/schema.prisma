@@ -279,3 +279,15 @@ model BookChapter {
 
   @@index([bookId, position])
 }
+
+// An outline she follows during meetings. The one with the lowest position
+// is the main one, shown first on every session page.
+model Outline {
+  id        String   @id @default(cuid())
+  name      String
+  // Plain text. Lines starting with "-" are bullets, "#" are headings.
+  content   String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

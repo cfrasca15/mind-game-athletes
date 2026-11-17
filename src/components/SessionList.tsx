@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Pill } from "@/components/ui";
 import { SESSION_STATUS_LABEL, SESSION_TYPE_LABEL, fmtDateTime } from "@/lib/format";
+import { getOutlines } from "@/lib/outlines";
+import { PlanEditor } from "@/components/PlanEditor";
 
 export type SessionRow = {
   id: string;
@@ -17,8 +19,19 @@ export type SessionRow = {
   team?: { id: string; name: string } | null;
 };
 
-export function SessionList({ sessions, showWho = false }: { sessions: SessionRow[]; showWho?: boolean }) {
+/** The first stretch of a plan, on one line. */
+function preview(plan: string) {
+  const flat = plan.replace(/^\s*(#{1,3}|[-*•])\s+/gm, "").replace(/\s+/g, " ").trim();
+  return flat.length > 150 ? `${flat.slice(0, 150)}…` : flat;
+}
+
+export async function SessionList({ sessions, showWho = false }: { sessions: SessionRow[]; showWho?: boolean }) {
   if (sessions.length === 0) return <p className="text-sm text-stone-500">No sessions.</p>;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  // Sessions still ahead can be planned right here in the list.
+  const canPlan = (s: SessionRow) => s.status === "SCHEDULED" && s.startsAt >= startOfToday;
+  const outlines = sessions.some(canPlan) ? await getOutlines() : [];
   return (
     <ul className="divide-y divide-stone-100">
       {sessions.map((s) => (
@@ -41,8 +54,18 @@ export function SessionList({ sessions, showWho = false }: { sessions: SessionRo
           {s.status === "COMPLETED" && s.nextFocus && (
             <p className="mt-1 text-xs text-brand-800"><span className="font-medium">Next:</span> {s.nextFocus}</p>
           )}
-          {s.status === "SCHEDULED" && s.prepNotes && (
-            <p className="mt-1 line-clamp-2 text-sm text-stone-500"><span className="font-medium">Plan:</span> {s.prepNotes}</p>
+          {canPlan(s) ? (
+            <details className="group mt-1">
+              <summary className="text-sm">
+                <span className="font-medium text-brand-800">{s.prepNotes ? "Plan" : "Plan this session"}</span>
+                {s.prepNotes && <span className="ml-1.5 text-stone-500 group-open:hidden">{preview(s.prepNotes)}</span>}
+              </summary>
+              <div className="mt-2">
+                <PlanEditor sessionId={s.id} initial={s.prepNotes ?? ""} outlines={outlines} compact />
+              </div>
+            </details>
+          ) : s.status === "SCHEDULED" && s.prepNotes && (
+            <p className="mt-1 line-clamp-2 text-sm text-stone-500"><span className="font-medium">Plan:</span> {preview(s.prepNotes)}</p>
           )}
         </li>
       ))}

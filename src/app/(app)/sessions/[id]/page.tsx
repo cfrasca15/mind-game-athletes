@@ -10,6 +10,10 @@ import {
 import { BackLink, Field, PageHeader, Pill } from "@/components/ui";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { retryGoogleSyncAction } from "@/lib/actions/google";
+import { getOutlines } from "@/lib/outlines";
+import { OutlinePanel } from "@/components/OutlinePanel";
+import { OutlineText } from "@/components/OutlineText";
+import { PlanEditor } from "@/components/PlanEditor";
 import { SESSION_STATUS_LABEL, SESSION_TYPE_LABEL, fmtDateTime, fullName, money } from "@/lib/format";
 
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,6 +39,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
     take: 3,
   });
 
+  const outlines = await getOutlines();
   const isOpen = s.status === "SCHEDULED";
 
   return (
@@ -72,12 +77,23 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
         </form>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          {s.prepNotes && (
+      {/* On a wide screen the outline sits top right, beside the plan and notes. On a phone it comes first. */}
+      <div className="grid gap-6 lg:grid-cols-3 lg:grid-rows-[auto_1fr]">
+        <div className="lg:col-start-3 lg:row-start-1">
+          <OutlinePanel outlines={outlines} />
+        </div>
+
+        <div className="space-y-6 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+          {isOpen ? (
+            <section className="card" id="plan">
+              <h2 className="mb-1 font-semibold text-stone-900">Plan</h2>
+              <p className="mb-3 text-sm text-stone-500">Write what you want to cover. It stays here for the session and is never sent to Google Calendar.</p>
+              <PlanEditor sessionId={s.id} initial={s.prepNotes ?? ""} outlines={outlines} lastFocus={previous[0]?.nextFocus} />
+            </section>
+          ) : s.prepNotes && (
             <section className="card">
               <h2 className="mb-2 font-semibold text-stone-900">Plan</h2>
-              <p className="whitespace-pre-line text-sm text-stone-700">{s.prepNotes}</p>
+              <OutlineText text={s.prepNotes} />
             </section>
           )}
 
@@ -104,7 +120,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           </section>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 lg:col-start-3 lg:row-start-2">
           {s.client && s.client.goals.length > 0 && (
             <section className="card">
               <h2 className="mb-2 font-semibold text-stone-900">Active goals</h2>
